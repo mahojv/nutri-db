@@ -35,7 +35,18 @@ export const index = async (req, res, next) => {
  */
 export const show = async (req, res, next) => {
   try {
-    const dieta = await Dieta.findByPk(req.params.id);
+    const dieta = await Dieta.findByPk(req.params.id, {
+      include: [
+        {
+          association: "user",
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+        "comida",
+      ],
+
+    });
     if (!dieta) {
       throw { status: 404, message: "dieta not found" };
     }
@@ -54,17 +65,22 @@ export const show = async (req, res, next) => {
  */
 export const store = async (req, res, next) => {
   try {
-    const dieta = await Dieta.create(req.body, {
-      validate: true,
-    });
+    const { comidas, ...dataDieta } = req.body;
+    const dieta = await Dieta.create(dataDieta, { validate: true });
+    if (comidas && Array.isArray(comidas) && comidas.length > 0) {
+      await dieta.setComida(comidas);
+    }
+
     res.status(201).json({
       status: "ok",
-      message: "Dieta created successfully",
+      message: "Dieta creada exitosamente",
+      dieta,
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * @description Update a Dieta
@@ -75,7 +91,7 @@ export const store = async (req, res, next) => {
  */
 export const update = async (req, res, next) => {
   try {
-    const dieta = await DietafindByPk(req.params.id);
+    const dieta = await Dieta.findByPk(req.params.id);
     if (!dieta) {
       throw { status: 404, message: "Dieta not found" };
     }
@@ -104,6 +120,10 @@ export const destroy = async (req, res, next) => {
     if (!dieta) {
       throw { status: 404, message: "Dieta not found" };
     }
+    
+    // Limpia las asociaciones con comidas antes de eliminar
+    await dieta.setComida([]);
+
     await dieta.destroy();
     res.status(204).json({
       status: "ok",

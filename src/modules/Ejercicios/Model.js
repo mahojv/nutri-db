@@ -20,6 +20,10 @@ Ejercicios.init(
         },
         img:{
             type: DataTypes.STRING,
+            allowNull:true
+        },
+        instrucciones:{
+            type: DataTypes.STRING,
             allowNull:false
         },
     },

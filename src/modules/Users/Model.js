@@ -17,7 +17,7 @@ Users.init(
         },
         middle_name: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         lastname: {
             type: DataTypes.STRING,
@@ -25,12 +25,12 @@ Users.init(
         },
         second_lastname: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         phone: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
-            validate: {isNumeric: true},
+           
         },
         email: {
             type: DataTypes.STRING,
@@ -54,12 +54,16 @@ Users.init(
         },
         roles_id: {
             type: DataTypes.BIGINT,
-            allowNull:false,
+            allowNull:true,
             references:{
                 model: "roles",
                 key: "id",
             },
 
+        },
+        nxtvisit: {
+            type: DataTypes.DATE,
+            allowNull: true,
         },
     },
     {
@@ -71,4 +75,4 @@ Users.init(
     }
 );
 
-Users.belongsTo(Roles, { foreignKey: "role_id", as: "role" });
+Users.belongsTo(Roles, { foreignKey: "roles_id", as: "role" });

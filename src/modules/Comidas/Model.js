@@ -1,7 +1,8 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../../database/sequelize.js";
 
-export class Comidas extends Model {}
+
+export class Comidas extends Model { }
 
 Comidas.init(
     {
@@ -17,7 +18,16 @@ Comidas.init(
         ingredientes: {
             type: DataTypes.STRING,
             allowNull: false,
-       }
+        },
+        instrucciones: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        calorias: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+
     },
     {
         sequelize,
@@ -27,3 +37,4 @@ Comidas.init(
         updatedAt: "updated_at",
     }
 );
+

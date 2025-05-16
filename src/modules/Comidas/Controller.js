@@ -1,3 +1,4 @@
+import { Dieta_Comida } from "../Dieta_Comida/Model.js";
 import {Comidas}from "./Model.js"
     
  /**
@@ -87,21 +88,31 @@ import {Comidas}from "./Model.js"
   * @returns {Promise<void>}
   */
  
- export const destroy = async (req, res, next) => {
-   try {
-     const comida = await Comidas.findByPk(req.params.id);
-     if (!comida) {
-       throw { status: 404, message: "Comidas not found" };
-     }
-      await comida.destroy();
-      res.status(204).json({
-        status: "ok",
-        message: "Comidas deleted successfully" 
-      });
-   } catch (error) {
-     next(error);
-   }
- };
+
+
+export const destroy = async (req, res, next) => {
+  try {
+    const comida = await Comidas.findByPk(req.params.id);
+    if (!comida) {
+      throw { status: 404, message: "Comida not found" };
+    }
+
+    // Eliminar relaciones en la tabla pivote
+    await Dieta_Comida.destroy({
+      where: { comidas_id: req.params.id }
+    });
+
+    // Luego eliminar la comida
+    await comida.destroy();
+
+    res.status(204).json({
+      status: "ok",
+      message: "Comida deleted successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
  
  export default { index, show, store, update, destroy };
 

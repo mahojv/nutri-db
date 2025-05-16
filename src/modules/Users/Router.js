@@ -4,9 +4,9 @@ import { index, show, store, update, destroy, profile, restore } from "./Control
 export const usersRouter = Router();
 
 usersRouter.get("/", index);
+usersRouter.get("/profile", profile); 
 usersRouter.get("/:id", show);
 usersRouter.post("/", store);
 usersRouter.put("/:id", update);
 usersRouter.delete("/:id", destroy); 
 usersRouter.patch("/:id/restore", restore);
-usersRouter.get("/profile", profile); 

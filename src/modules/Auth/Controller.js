@@ -13,34 +13,39 @@ async function login(req, res, next) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const user = await Users.findOne({ where: { email } });
+    const user = await Users.findOne({ 
+      where: { email },
+      include: ['role']
+    });
+     
     if (!user || user.status !== "active") {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(403).json({ message: "Invalid credentials" });
     }
 
     const validPassword = await compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(403).json({ message: "Invalid credentials" });
     }
-
-    const token = jwt.sign({ id: user.id }, jwtSecret, { expiresIn: "24h" });
+    const payload = { id: user.id, role: user.role.name } 
+    const token = jwt.sign( payload, jwtSecret, { expiresIn: "24h" });
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,  
     });
 
-    res.status(200).json({ 
+    res.status(200).json({
       status: "ok",
       message: "Login successful",
-      token, 
+      token,
     });
 
   } catch (error) {
     next(error);
   }
-} 
+}
 
 async function changePassword(req, res, next) {
 

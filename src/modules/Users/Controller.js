@@ -13,7 +13,7 @@ export const index = async (req, res, next) => {
     const users = await Users.findAll({
       where: { status: true },
       attributes: { exclude: ["password"] },
-      include:["role"],
+      include: ["role"],
     });
     res.status(200).json(users);
   } catch (error) {
@@ -31,8 +31,8 @@ export const index = async (req, res, next) => {
 export const show = async (req, res, next) => {
   try {
     const user = await Users.findByPk(req.params.id, {
-      attributes: {exclude:['password']},
-      include:['role']
+      attributes: { exclude: ['password'] },
+      include: ['role']
     });
 
     if (!user) {
@@ -54,7 +54,7 @@ export const show = async (req, res, next) => {
  */
 export const store = async (req, res, next) => {
   try {
-    const requeredFields = ["firstname", "lastname", "email", "password", "phone", "role_id"];
+    const requeredFields = ["firstname", "lastname", "email", "password", "phone", "roles_id"];
     const missingFields = requeredFields.filter((field) => !req.body[field]);
 
     if (missingFields.length > 0) {
@@ -92,12 +92,20 @@ export const store = async (req, res, next) => {
  */
 export const update = async (req, res, next) => {
   try {
+    if (req.body.status === 'active') req.body.status = 1;
+    else if (req.body.status === 'inactive') req.body.status = 0;
     const users = await Users.findByPk(req.params.id);
     if (!users) {
       throw { status: 404, message: "Users not found" };
     }
-    await Users.update(req.body);
-    res.status(200).json(users);
+
+    await Users.update(req.body, {
+      where: { id: req.params.id }
+    });
+
+    const updatedUser = await Users.findByPk(req.params.id); // para devolver datos actualizados
+
+    res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }
@@ -153,12 +161,13 @@ export const restore = async (req, res, next) => {
  * @returns {Promise<void>}
  */
 export const profile = async (req, res, next) => {
+  console.log(req)
   try {
-    const user = await Users.findByPk(req.user.id);
+    const user = await Users.findByPk(req.auth.id);
     if (!user) {
       throw { status: 404, message: "Users not found" };
     }
-    
+
     res.status(200).json(user);
 
   } catch (error) {
@@ -166,11 +175,12 @@ export const profile = async (req, res, next) => {
   }
 }
 
-function validateAdminRole(req, res){
+function validateAdminRole(req, res) {
 
-  req.auth.role = "Administrador"
+  // req.auth.role = "Administrador"
+  console.log(req.auth)
 
-  if (req.auth.role !== 'Administrador') {
+  if (req.auth.role !== 'administrador') {
     res.status(401).json("No tienes permisos para visualizar este contenido")
   }
 }
